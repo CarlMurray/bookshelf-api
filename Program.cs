@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Cors;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -34,17 +36,22 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Show debug page if in development
 if (app.Configuration.GetValue<bool>("UseDeveloperExceptionPage"))
+{
     app.UseDeveloperExceptionPage();
+}
 else app.UseExceptionHandler("/error");
 
 app.UseHttpsRedirection();
 
+// Enable CORS
+app.UseCors();
 app.UseAuthorization();
 
 // endpoint for error handling
-app.MapGet("/error", () => Results.Problem());
-app.MapGet("/error/test", () => { throw new Exception("test"); });
+app.MapGet("/error", [EnableCors("AnyOrigin")] () => Results.Problem());
+app.MapGet("/error/test", [EnableCors("AnyOrigin")] () => { throw new Exception("test"); });
 
 app.MapControllers();
 
