@@ -15,6 +15,7 @@ namespace BookshelfAPI.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60)]
         public IEnumerable<Book> GetBooks()
         {
             return new List<Book>
