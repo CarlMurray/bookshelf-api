@@ -1,4 +1,5 @@
 ﻿using BookshelfAPI.DTO;
+using BookshelfAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookshelfAPI.Controllers
@@ -21,19 +22,7 @@ namespace BookshelfAPI.Controllers
             return new RestDTO<Book[]>()
             {
                 Data = new Book[] {
-                new()
-                {
-                    Id = 1, Author = "Charles Duhigg", Name = "Habit", Description = "How to form life changing habits."
-                },
-                new()
-                {
-                    Id = 2, Author = "Jaime Levy", Name = "UX Strategy", Description = "A guide to UX strategy"
-                },
-                new()
-                {
-                    Id = 3, Author = "David Travis", Name = "Think Like a UX Researcher",
-                    Description = "How to survive as a UXR."
-                }
+          
 
                 },
 
