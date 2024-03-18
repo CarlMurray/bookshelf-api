@@ -11,7 +11,7 @@ namespace BookshelfAPI.DTO
     //}
     public record AuthorGetDTO(
         int Id,
-        string Name,
-        List<Book> Books
+        string Name
+        //List<Book> Books
     );
 }

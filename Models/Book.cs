@@ -13,6 +13,6 @@ namespace BookshelfAPI.Models
         [Required][MaxLength(10)] public string ISBN { get; set; }
         [Required] public DateTime PublishDate { get; set; }
         [Required] public int NumPages { get; set; }
-        public List<Author> Authors { get; } = [];
+        public List<Author> Authors { get; set; }
     }
 }

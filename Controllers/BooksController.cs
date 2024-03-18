@@ -23,22 +23,23 @@ namespace BookshelfAPI.Controllers
         public async Task<RestDTO<BookGetDTO[]>> Get()
         {
             var query = _context.Books;
-            var books = await query.ToListAsync();
+            var books = await query.Include(b => b.Authors).ToListAsync();
             List<BookGetDTO> bookDtos = [];
             foreach (var book in books)
             {
-                var item = new BookGetDTO()
+                var bookDtoAuthors = new List<AuthorGetDTO>();
+                foreach (var author in book.Authors)
                 {
-                    Id = book.Id,
-                    Title = book.Title,
-                    Description = book.Description,
-                    ISBN = book.ISBN,
-                    NumPages = book.NumPages,
-                    Authors = book.Authors,
-                    PublishDate = book.PublishDate
-                };
+                    var _author = new AuthorGetDTO(author.Id, author.Name);
+                    bookDtoAuthors.Add(_author);
+                }
+
+                var item = new BookGetDTO(book.Id, book.Title, book.Description, book.ISBN, book.PublishDate,
+                    book.NumPages, bookDtoAuthors);
+
                 bookDtos.Add(item);
             }
+
             return new RestDTO<BookGetDTO[]>()
             {
                 Data = bookDtos.ToArray(),
@@ -49,10 +50,12 @@ namespace BookshelfAPI.Controllers
             };
         }
 
+
         [HttpPost]
         public async Task<ActionResult<BookCreateDTO>> Post(BookCreateDTO bookDto)
         {
             var query = _context.Books;
+            var authors = await _context.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToListAsync();
 
             // Create new book
             var book = new Book()
@@ -61,11 +64,9 @@ namespace BookshelfAPI.Controllers
                 Description = bookDto.Description,
                 NumPages = bookDto.NumPages,
                 PublishDate = bookDto.PublishDate.Date,
-                ISBN = bookDto.ISBN
+                ISBN = bookDto.ISBN,
+                //Authors = authors
             };
-
-            // Get the Authors from dbcontext
-            var authors = await _context.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToListAsync();
 
             // Add the authors to book
             foreach (var author in authors)
@@ -76,7 +77,25 @@ namespace BookshelfAPI.Controllers
             // Add book to db
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(Post), new { id = book.Id }, book);
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult<BookGetDTO> Delete(int id)
+        {
+            var books = _context.Books;
+            try
+            {
+                var book = books.First(b => b.Id == id);
+                books.Remove(book);
+            }
+            catch (Exception e)
+            {
+                return NotFound("Object does not exist.");
+            }
+
+            _context.SaveChanges();
+            return Ok();
         }
     }
 }

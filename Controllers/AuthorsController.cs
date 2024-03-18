@@ -25,7 +25,7 @@ namespace BookshelfAPI.Controllers
             List<AuthorGetDTO> authorsDtos = [];
             foreach (var author in authors)
             {
-                var authorDto = new AuthorGetDTO(author.Id, author.Name, author.Books);
+                var authorDto = new AuthorGetDTO(author.Id, author.Name);
                 authorsDtos.Add(authorDto);
             }
 
