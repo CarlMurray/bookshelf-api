@@ -18,6 +18,9 @@ namespace BookshelfAPI.Controllers
             _context = context;
         }
 
+        /// <summary>
+        /// Gets all Books.
+        /// </summary>
         [HttpGet]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60)]
         public async Task<RestDTO<BookGetDTO[]>> Get()
@@ -50,7 +53,9 @@ namespace BookshelfAPI.Controllers
             };
         }
 
-
+        /// <summary>
+        /// Creates a new Book.
+        /// </summary>
         [HttpPost]
         public async Task<ActionResult<BookCreateDTO>> Post(BookCreateDTO bookDto)
         {
@@ -78,25 +83,9 @@ namespace BookshelfAPI.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
-        [HttpDelete("{id}")]
-        public ActionResult<BookGetDTO> Delete(int id)
-        {
-            var books = _context.Books;
-            try
-            {
-                var book = books.First(b => b.Id == id);
-                books.Remove(book);
-            }
-            catch (Exception e)
-            {
-                return NotFound("Object does not exist.");
-            }
-
-            _context.SaveChanges();
-            return Ok();
-        }
-
+        /// <summary>
+        /// Edits a Book.
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<BookCreateDTO>> Put(int id, BookCreateDTO bookDto)
         {
@@ -124,9 +113,32 @@ namespace BookshelfAPI.Controllers
             book.PublishDate = bookDto.PublishDate;
             _context.SaveChangesAsync();
             return Ok();
-
         }
 
+        /// <summary>
+        /// Deletes a Book.
+        /// </summary>
+        [HttpDelete("{id}")]
+        public ActionResult<BookGetDTO> Delete(int id)
+        {
+            var books = _context.Books;
+            try
+            {
+                var book = books.First(b => b.Id == id);
+                books.Remove(book);
+            }
+            catch (Exception e)
+            {
+                return NotFound("Object does not exist.");
+            }
+
+            _context.SaveChanges();
+            return Ok();
+        }
+
+        /// <summary>
+        /// Deletes all books.
+        /// </summary>
         [HttpDelete("delete_all")]
         public async Task<ActionResult> DeleteAll()
         {

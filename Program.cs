@@ -2,6 +2,7 @@ using BookshelfAPI.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,11 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
+        $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+});
 
 // configure CORS
 builder.Services.AddCors(options =>
@@ -56,16 +61,6 @@ app.UseHttpsRedirection();
 // Enable CORS
 app.UseCors();
 app.UseAuthorization();
-
-// endpoint for error handling
-app.MapGet("/error",
-    [EnableCors("AnyOrigin")][ResponseCache(NoStore = true)]
-() => Results.Problem());
-app.MapGet("/error/test",
-    [EnableCors("AnyOrigin")][ResponseCache(NoStore = true)]
-() =>
-    { throw new Exception("test"); });
-
 
 app.MapControllers();
 

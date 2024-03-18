@@ -1,6 +1,7 @@
 ﻿using BookshelfAPI.DTO;
 using BookshelfAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BookshelfAPI.Controllers
 {
@@ -18,6 +19,9 @@ namespace BookshelfAPI.Controllers
         }
 
         // GET: api/authors
+        /// <summary>
+        /// Gets all Authors.
+        /// </summary>
         [HttpGet]
         public ActionResult<RestDTO<AuthorGetDTO[]>> Get()
         {
@@ -39,28 +43,10 @@ namespace BookshelfAPI.Controllers
             };
         }
 
-
-        // POST api/authors
-        [HttpPost]
-        public ActionResult Post(AuthorCreateDTO authorDto)
-        {
-            var authors = _context.Authors;
-
-            if (string.IsNullOrWhiteSpace(authorDto.Name))
-            {
-                // Failed validation message
-                return ValidationProblem("Name must not be empty or whitespace.");
-            }
-            var author = new Author()
-            {
-                Name = authorDto.Name
-            };
-            authors.Add(author);
-            _context.SaveChanges();
-            return Ok(authors);
-        }
-
         // PUT api/authors/5
+        /// <summary>
+        /// Edits an Author.
+        /// </summary>
         [HttpPut("{id}")]
         public ActionResult Put(int id, AuthorCreateDTO authorDto)
         {
@@ -89,7 +75,34 @@ namespace BookshelfAPI.Controllers
 
         }
 
+        // POST api/authors
+        /// <summary>
+        /// Creates a new Author.
+        /// </summary>
+        [HttpPost]
+        public ActionResult Post(AuthorCreateDTO authorDto)
+        {
+            var authors = _context.Authors;
+
+            if (string.IsNullOrWhiteSpace(authorDto.Name))
+            {
+                // Failed validation message
+                return ValidationProblem("Name must not be empty or whitespace.");
+            }
+            var author = new Author()
+            {
+                Name = authorDto.Name
+            };
+            authors.Add(author);
+            _context.SaveChanges();
+            return Ok(authors);
+        }
+
+
         // DELETE api/authors/5
+        /// <summary>
+        /// Deletes an Author.
+        /// </summary>
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
@@ -107,6 +120,31 @@ namespace BookshelfAPI.Controllers
             }
             _context.SaveChanges();
             return Ok();
+        }
+
+        // DELETE api/authors/delete_all
+        /// <summary>
+        /// Deletes all Authors.
+        /// </summary>
+        [HttpDelete("delete_all")]
+        public async Task<ActionResult> DeleteAll()
+        {
+            var authors = _context.Authors;
+            if (!authors.IsNullOrEmpty())
+            {
+
+                foreach (var author in authors)
+                {
+                    authors.Remove(author);
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            else
+            {
+                return NotFound("No authors to delete.");
+            }
         }
     }
 }
