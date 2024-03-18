@@ -65,7 +65,6 @@ namespace BookshelfAPI.Controllers
                 NumPages = bookDto.NumPages,
                 PublishDate = bookDto.PublishDate.Date,
                 ISBN = bookDto.ISBN,
-                //Authors = authors
             };
 
             // Add the authors to book
@@ -95,6 +94,50 @@ namespace BookshelfAPI.Controllers
             }
 
             _context.SaveChanges();
+            return Ok();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<BookCreateDTO>> Put(int id, BookCreateDTO bookDto)
+        {
+            var books = _context.Books;
+            var authors = await _context.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToListAsync();
+
+            Book book;
+            // get the id user entered
+            // find the book it relates to
+            // update the data for that book
+            try
+            {
+                book = books.First(a => a.Id == id);
+
+            }
+            catch (Exception e)
+            {
+                return NotFound("Object doesn't exist.");
+            }
+            book.Title = bookDto.Title;
+            book.Description = bookDto.Description;
+            book.ISBN = bookDto.ISBN;
+            book.Authors = authors;
+            book.NumPages = bookDto.NumPages;
+            book.PublishDate = bookDto.PublishDate;
+            _context.SaveChangesAsync();
+            return Ok();
+
+        }
+
+        [HttpDelete("delete_all")]
+        public async Task<ActionResult> DeleteAll()
+        {
+            var books = _context.Books;
+            foreach (var book in books)
+            {
+                books.Remove(book);
+            }
+
+            _context.SaveChangesAsync();
+
             return Ok();
         }
     }
