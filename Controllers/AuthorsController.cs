@@ -95,7 +95,7 @@ namespace BookshelfAPI.Controllers
             };
             authors.Add(author);
             _context.SaveChanges();
-            return Ok(authors);
+            return Ok(author);
         }
 
 

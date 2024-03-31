@@ -2,6 +2,7 @@
 using BookshelfAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Nodes;
 
 namespace BookshelfAPI.Controllers
 {
@@ -59,6 +60,7 @@ namespace BookshelfAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<BookCreateDTO>> Post(BookCreateDTO bookDto)
         {
+            Console.WriteLine(bookDto.AuthorIds);
             var query = _context.Books;
             var authors = await _context.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToListAsync();
 
@@ -70,6 +72,7 @@ namespace BookshelfAPI.Controllers
                 NumPages = bookDto.NumPages,
                 PublishDate = bookDto.PublishDate.Date,
                 ISBN = bookDto.ISBN,
+                Authors = new List<Author>()
             };
 
             // Add the authors to book
