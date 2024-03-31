@@ -34,8 +34,19 @@ builder.Services.AddCors(options =>
         _ = config.AllowAnyOrigin();
     });
 });
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+if (Environment.GetEnvironmentVariable("DOCKER") == "true")
+{
+    var connectionString = Environment.GetEnvironmentVariable("DOCKER_DB_STRING");
+    // Docker deployment
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(connectionString));
+}
+else
+{   // Local development
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 WebApplication app = builder.Build();
 
@@ -63,5 +74,14 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
 
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    if (context.Database.GetPendingMigrations().Any())
+    {
+        context.Database.Migrate();
+    }
+}
 app.Run();
