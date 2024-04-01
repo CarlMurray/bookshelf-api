@@ -54,6 +54,27 @@ namespace BookshelfAPI.Controllers
             };
         }
 
+        [HttpGet("{id}")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60)]
+        public async Task<IActionResult> GetBook(int id)
+        {
+            var query = _context.Books;
+            var book = await query.Include(b => b.Authors).FirstOrDefaultAsync(b => b.Id == id);
+
+            var bookDtoAuthors = new List<AuthorGetDTO>();
+
+            foreach (var author in book.Authors)
+            {
+                var _author = new AuthorGetDTO(author.Id, author.Name);
+                bookDtoAuthors.Add(_author);
+            }
+
+            var item = new BookGetDTO(book.Id, book.Title, book.Description, book.ISBN, book.PublishDate,
+                book.NumPages, bookDtoAuthors);
+
+            return Ok(item);
+        }
+
         /// <summary>
         /// Creates a new Book.
         /// </summary>
@@ -90,10 +111,14 @@ namespace BookshelfAPI.Controllers
         /// Edits a Book.
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<ActionResult<BookCreateDTO>> Put(int id, BookCreateDTO bookDto)
+        public async Task<ActionResult<BookCreateDTO>> Put(int id, BookCreateDTO bookDto=null)
         {
             var books = _context.Books;
-            var authors = await _context.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToListAsync();
+            List<Author> authors = null;
+            if(bookDto.AuthorIds != null)
+            {
+             authors = await _context.Authors.Where(a => bookDto.AuthorIds.Contains(a.Id)).ToListAsync();
+            }
 
             Book book;
             // get the id user entered
@@ -111,10 +136,10 @@ namespace BookshelfAPI.Controllers
             book.Title = bookDto.Title;
             book.Description = bookDto.Description;
             book.ISBN = bookDto.ISBN;
-            book.Authors = authors;
+            //book.Authors = authors;
             book.NumPages = bookDto.NumPages;
             book.PublishDate = bookDto.PublishDate;
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return Ok();
         }
 

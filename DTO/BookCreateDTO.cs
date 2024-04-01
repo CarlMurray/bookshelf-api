@@ -9,7 +9,7 @@ namespace BookshelfAPI.DTO
         string ISBN,
         DateTime PublishDate,
         int NumPages,
-        List<int> AuthorIds
+        List<int>? AuthorIds
     );
 
 }
