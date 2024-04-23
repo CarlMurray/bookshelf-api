@@ -2,6 +2,7 @@ using BookshelfAPI.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Reflection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -37,13 +38,18 @@ builder.Services.AddCors(options =>
 
 if (Environment.GetEnvironmentVariable("DOCKER") == "true")
 {
-    var connectionString = Environment.GetEnvironmentVariable("DOCKER_DB_STRING");
     // Docker deployment
+    var host = Environment.GetEnvironmentVariable("DB_HOST");
+    var db = Environment.GetEnvironmentVariable("DB_NAME");
+    var user = Environment.GetEnvironmentVariable("DB_USER");
+    var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
+    var connectionString = $"Server={host};Database={db};User Id={user};Password={password};Integrated Security=False;MultipleActiveResultSets=True;TrustServerCertificate=True";
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(connectionString));
 }
 else
-{   // Local development
+{
+    // Local development
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
@@ -74,14 +80,5 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
 
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    if (context.Database.GetPendingMigrations().Any())
-    {
-        context.Database.Migrate();
-    }
-}
 app.Run();

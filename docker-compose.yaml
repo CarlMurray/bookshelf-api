@@ -7,18 +7,18 @@ services:
             - bookshelf-api-db
       environment:
             - DOCKER=true
-            - DOCKER_DB_STRING=Server=bookshelf-api-db;Database=master;User=sa;Password=Password123;MultipleActiveResultSets=true;TrustServerCertificate=True
+            - DB_HOST=bookshelf-api-db
+            - DB_USER
+            - DB_PASSWORD
+            - DB_NAME
+
 
   bookshelf-api-db:
-        image: mcr.microsoft.com/mssql/server:2022-latest
+        image: carlmurray/bookshelf-api-db:latest
         container_name: bookshelf-api-db
-        user: root
         ports:
-            - "8081:1433"
+            - "1435:1433"
         environment:
-            MSSQL_SA_PASSWORD: "Password123"
-            SA_PASSWORD: "Password123"
+            MSSQL_SA_PASSWORD: "yourStrong(!)Password"
             ACCEPT_EULA: "Y"
             MSSQL_PID: "Developer"
-        volumes:
-             - ./db:/var/opt/mssql
